@@ -3,7 +3,6 @@ package bittrex
 import (
 	"fmt"
 	"github.com/joho/godotenv"
-	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
@@ -69,7 +68,7 @@ func TestPublicAPI(t *testing.T)  {
 
 
 	// This should throw ERR_ORDER_MISSING_PARAMETERS
-	resCreateOrder, err := bittrex.CreateOrder(CreateOrderParams{
+	/*resCreateOrder, err := bittrex.CreateOrder(CreateOrderParams{
 		MarketSymbol:  "CRW-BTC",
 		Direction:     BUY,
 		Type:          "",
@@ -81,7 +80,7 @@ func TestPublicAPI(t *testing.T)  {
 		UseAwards:     "",
 	})
 	assert.Equal(t, ERR_ORDER_MISSING_PARAMETERS, err)
-	assert.Equal(t, OrderV3{}, resCreateOrder)
+	assert.Equal(t, OrderV3{}, resCreateOrder)*/
 
 	resBalances, err := bittrex.GetBalances()
 	assert.Nil(t, err)
@@ -129,3 +128,20 @@ func TestPublicAPI(t *testing.T)  {
 	assert.Nil(t, err)
 	fmt.Println(info)
 }*/
+
+func TestTrade(t *testing.T) {
+	bittrex := New(os.Getenv("API_PUBLIC"), os.Getenv("API_SECRET"))
+	info, err := bittrex.CreateOrder(CreateOrderParams{
+		MarketSymbol:  "CRW-BTC",
+		Direction:     SELL,
+		Type:          MARKET,
+		Quantity:      150,
+		Ceiling:       0,
+		Limit:         0,
+		TimeInForce:   FILL_OR_KILL,
+		ClientOrderID: "",
+		UseAwards:     "",
+	})
+	assert.Nil(t, err)
+	fmt.Println(info)
+}

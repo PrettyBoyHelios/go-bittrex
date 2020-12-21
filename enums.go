@@ -17,6 +17,7 @@ const (
 	FILL_OR_KILL TimeInForce = "FILL_OR_KILL"
 	POST_ONLY_GOOD_TIL_CANCELLED TimeInForce = "POST_ONLY_GOOD_TIL_CANCELLED"
 	BUY_NOW TimeInForce = "BUY_NOW"
+	INSTANT TimeInForce = "INSTANT"
 )
 
 type OrderDirection string

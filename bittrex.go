@@ -90,7 +90,7 @@ func (b *Bittrex) GetCurrencies() (currencies []CurrencyV3, err error) {
 
 // GetCurrency is used to get information of a single currency at Bittrex along with other meta data.
 func (b *Bittrex) GetCurrency(symbol string) (currencies CurrencyV3, err error) {
-	r, err := b.client.do("GET", "currencies/" + symbol, "", false)
+	r, err := b.client.do("GET", "currencies/"+symbol, "", false)
 	if err != nil {
 		return
 	}
@@ -246,50 +246,66 @@ func (b *Bittrex) BuyLimit(market string, quantity, rate decimal.Decimal) (uuid 
 // CreateOrder is used to create any type of supported order.
 func (b *Bittrex) CreateOrder(params CreateOrderParams) (order OrderV3, err error) {
 	// TODO Preprocessor
-	if params.Type == "" || params.MarketSymbol == "" || params.Direction == "" || params.TimeInForce == ""{
+	if params.Type == "" || params.MarketSymbol == "" || params.Direction == "" || params.TimeInForce == "" {
 		// Check for missing parameters
 		return OrderV3{}, ERR_ORDER_MISSING_PARAMETERS
 	}
-	var finalParams = CreateOrderParams{
-		MarketSymbol:  params.MarketSymbol,
-		Direction:     params.Direction,
-		Type:          params.Type,
-		Quantity:      decimal.Decimal{},
-		Ceiling:       decimal.Decimal{},
-		Limit:         decimal.Decimal{},
-		TimeInForce:   params.TimeInForce,
-		ClientOrderID: params.ClientOrderID,
-		UseAwards:     params.UseAwards,
-	}
 
-	switch params.Type {
-	case MARKET:
-		finalParams.Quantity = params.Quantity
-	case LIMIT:
-		finalParams.Limit = params.Limit
-		finalParams.Quantity = params.Quantity
-	case CEILING_LIMIT:
-		finalParams.Ceiling = params.Ceiling
-	case CEILING_MARKET:
-		finalParams.Ceiling = params.Ceiling
+	if params.Type == MARKET {
+		var finalParams = CreateMarketOrderParams{
+			MarketSymbol:  params.MarketSymbol,
+			Direction:     params.Direction,
+			Type:          params.Type,
+			Quantity:      params.Quantity,
+			TimeInForce:   params.TimeInForce,
+			ClientOrderID: params.ClientOrderID,
+			UseAwards:     params.UseAwards,
+		}
+		payload, err1 := json.Marshal(finalParams)
+		if err1 != nil {
+			return
+		}
+		r, err2 := b.client.do("POST", fmt.Sprintf("orders"), string(payload), true)
+		if err2 != nil {
+			return
+		}
+		err = json.Unmarshal(r, &order)
+		return
+	} else {
+		var finalParams = CreateOrderParams{
+			MarketSymbol:  params.MarketSymbol,
+			Direction:     params.Direction,
+			Type:          params.Type,
+			TimeInForce:   params.TimeInForce,
+			ClientOrderID: params.ClientOrderID,
+			UseAwards:     params.UseAwards,
+		}
+		switch params.Type {
+		case LIMIT:
+			finalParams.Limit = params.Limit
+			finalParams.Quantity = params.Quantity
+		case CEILING_LIMIT:
+			finalParams.Ceiling = params.Ceiling
+		case CEILING_MARKET:
+			finalParams.Ceiling = params.Ceiling
 
-	}
-
-	payload, err := json.Marshal(finalParams)
-	if err != nil {
+		}
+		payload, err1 := json.Marshal(finalParams)
+		if err1 != nil {
+			return
+		}
+		r, err2 := b.client.do("POST", fmt.Sprintf("orders"), string(payload), true)
+		if err2 != nil {
+			return
+		}
+		err = json.Unmarshal(r, &order)
 		return
 	}
-	r, err := b.client.do("POST", fmt.Sprintf("orders"), string(payload), true)
-	if err != nil {
-		return
-	}
-	err = json.Unmarshal(r, &order)
-	return
 }
 
 // CancelOrder is used to cancel a buy or sell order.
 func (b *Bittrex) CancelOrder(orderID string) (order OrderV3, err error) {
-	r, err := b.client.do("DELETE", "orders/" + orderID, "", true)
+	r, err := b.client.do("DELETE", "orders/"+orderID, "", true)
 	if err != nil {
 		return
 	}
@@ -406,7 +422,7 @@ func (b *Bittrex) GetOpenWithdrawals(currency string, status WithdrawalStatus) (
 	if len(queryParams) != 0 {
 		resource += "?"
 	}
-	r, err := b.client.do("GET", resource + queryParams, "", true)
+	r, err := b.client.do("GET", resource+queryParams, "", true)
 	if err != nil {
 		return
 	}
@@ -428,7 +444,7 @@ func (b *Bittrex) GetClosedWithdrawals(currency string, status WithdrawalStatus)
 	if len(queryParams) != 0 {
 		resource += "?"
 	}
-	r, err := b.client.do("GET", resource + queryParams, "", true)
+	r, err := b.client.do("GET", resource+queryParams, "", true)
 	if err != nil {
 		return
 	}

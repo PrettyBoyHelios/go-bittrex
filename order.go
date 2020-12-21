@@ -56,9 +56,18 @@ type CreateOrderParams struct {
 	MarketSymbol  string `json:"marketSymbol"`
 	Direction     OrderDirection `json:"direction"`
 	Type          OrderType `json:"type"`
-	Quantity      decimal.Decimal `json:"quantity"`
-	Ceiling       decimal.Decimal `json:"ceiling"`
-	Limit         decimal.Decimal `json:"limit"`
+	Quantity      float64 `json:"quantity"`
+	Ceiling       float64 `json:"ceiling"`
+	Limit         float64 `json:"limit"`
+	TimeInForce   TimeInForce `json:"timeInForce"`
+	ClientOrderID string `json:"clientOrderId"`
+	UseAwards     string `json:"useAwards"`
+}
+type CreateMarketOrderParams struct {
+	MarketSymbol  string `json:"marketSymbol"`
+	Direction     OrderDirection `json:"direction"`
+	Type          OrderType `json:"type"`
+	Quantity      float64 `json:"quantity"`
 	TimeInForce   TimeInForce `json:"timeInForce"`
 	ClientOrderID string `json:"clientOrderId"`
 	UseAwards     string `json:"useAwards"`
